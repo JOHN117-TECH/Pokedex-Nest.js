@@ -61,10 +61,13 @@ $ yarn run test:cov
 ## Ejecutar en desarrollo
 
 1.Clonar el repositorio
+
 2.Ejecutar
+
 ```
 Yarn install
 ```
+
 3. Tener Nest CLI instalado
 
 ```
