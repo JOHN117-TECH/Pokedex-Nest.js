@@ -5,14 +5,24 @@ import { Model, isValidObjectId } from 'mongoose';
 import { Pokemon } from './entities/pokemon.entity';
 import { InjectModel } from '@nestjs/mongoose';
 import { PaginationDto } from 'src/common/dto/pagination.dto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class PokemonService {
 
+  private defaultLimit: number;
+
   constructor(
     @InjectModel(Pokemon.name)
-    private readonly pokemonModel: Model<Pokemon>
-  ) { }
+    private readonly pokemonModel: Model<Pokemon>,
+
+    private readonly configService: ConfigService
+
+  ) {
+
+    this.defaultLimit = configService.get<number>('defaultLimit');
+
+  }
 
   async create(createPokemonDto: CreatePokemonDto) {
     createPokemonDto.name = createPokemonDto.name.toLocaleLowerCase();
@@ -24,13 +34,30 @@ export class PokemonService {
     }
   }
 
-  findAll(PaginationDto: PaginationDto) {
+  async findAll(PaginationDto: PaginationDto) {
 
-    const { limit = 10, offset = 0 } = PaginationDto;
+    const { limit = this.defaultLimit, offset = 0, search = "" } = PaginationDto;
+    let pokemon: Pokemon;
 
-    return this.pokemonModel.find().limit(limit).skip(offset).sort({
-      no: 1
-    });
+    if (search.length >= 1) {
+      if (!isNaN(+search)) {
+        const pokemons = await this.pokemonModel.find({ no: search }).exec();
+        return pokemons;
+      } else {
+        if (isValidObjectId(search)) {
+          pokemon = await this.pokemonModel.findById(search);
+          return pokemon;
+        } else {
+          const regex = new RegExp(search, 'i'); // 'i' hace que la búsqueda sea insensible a mayúsculas y minúsculas
+          const pokemons = await this.pokemonModel.find({ name: { $regex: regex } }).exec();
+          return pokemons;
+
+        }
+      }
+    }
+
+    return this.pokemonModel.find().limit(limit).skip(offset).sort({ no: 1 });
+
   }
 
   async findOne(term: string) {

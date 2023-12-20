@@ -2,6 +2,7 @@ import axios, { AxiosInstance } from "axios";
 import { HttpAdapter } from "../interfaces/http-adapter.interface";
 import { Injectable } from "@nestjs/common";
 
+/* ESto es un custom Provider es un provider por que se puede inyectar */
 @Injectable()
 export class AxiosAdapter implements HttpAdapter {
 

@@ -1,6 +1,6 @@
 
 import { Transform } from "class-transformer";
-import { IsInt, IsOptional, IsPositive, Min } from "class-validator";
+import { IsInt, IsOptional, IsPositive, IsString, Min } from "class-validator";
 
 export class PaginationDto {
    
@@ -16,5 +16,9 @@ export class PaginationDto {
     @IsInt()
     @Transform(({ value }) => parseInt( value ) ) 
     offset?: number;
+
+    @IsOptional()
+    @IsString({ message: "Please enter a valid search 'value'" })
+    search?:string;
 
 }
